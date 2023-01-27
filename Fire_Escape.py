@@ -14,6 +14,10 @@ screen = pygame.display.set_mode((horiz_screen_size, vert_screen_size))
 #Floors
 number_of_floors = 5
 floor_height = 100
+building_width = 800
+
+horiz_offset = 25
+vert_offset = 25
 
 floors = []
 colors = []
@@ -25,23 +29,10 @@ for i in range(number_of_floors):
     else:
         colors.append((128,128,128))
 
-#Stickman Constants
-radius = 6
-body_length = 20
-arm_length = 12
-leg_length = 12
-width = 4
-
-stickman_floor = 0
-stickman_compartment = 4
-
-horiz_offset = 25
-vert_offset = 25
-
 
 # Compartment size
-compartment_size = 100
 number_of_compartments_per_floor = 8
+compartment_size = building_width/number_of_compartments_per_floor
 
 # Compartments list
 compartments = []
@@ -54,12 +45,21 @@ for i in range(number_of_floors):
     compartments.append(floor_compartments)
 
 
+#Stickman Constants
+radius = 6
+body_length = 20
+arm_length = 12
+leg_length = 12
+width = 4
+
+stickman_floor = 0
+stickman_compartment = 7        # Should be under "number_of_compartments_per_floor - 1"
 
 
 def draw_building(number_of_floors):
     y_coord = 25    #Starting point for drawing the floor at the top of the screen
     for i in range(number_of_floors):
-        pygame.draw.rect(screen, colors[i], (25, y_coord, 800, floors[i]))
+        pygame.draw.rect(screen, colors[i], (25, y_coord, building_width, floors[i]))
         y_coord +=floors[i]
     return y_coord
 
