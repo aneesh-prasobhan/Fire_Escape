@@ -31,29 +31,29 @@ for i in range(number_of_floors):
 
 
 # Compartment size
-number_of_compartments_per_floor = 8
-compartment_size = building_width/number_of_compartments_per_floor
+number_of_compartments_per_floor = 20
+compartment_width = building_width/number_of_compartments_per_floor
 
 # Compartments list
 compartments = []
 for i in range(number_of_floors):
     floor_compartments = []
     for j in range(number_of_compartments_per_floor):
-        x_coord = horiz_offset + j * compartment_size
-        y_coord = vert_offset + i * compartment_size
+        x_coord = horiz_offset + j * compartment_width
+        y_coord = vert_offset + i * floor_height
         floor_compartments.append((x_coord, y_coord))
     compartments.append(floor_compartments)
 
 
 #Stickman Constants
-radius = 6
-body_length = 20
-arm_length = 12
-leg_length = 12
-width = 4
+radius = 10
+body_length = 40
+arm_length = 18
+leg_length = 18
+width = 6
 
 stickman_floor = 0
-stickman_compartment = 7        # Should be under "number_of_compartments_per_floor - 1"
+stickman_compartment = 0        # Should be under "number_of_compartments_per_floor - 1"
 
 
 def draw_building(number_of_floors):
@@ -83,12 +83,12 @@ def get_compartment_coordinates(floor, compartment):
 def draw_stickman(floor, compartment):
     x, y = get_compartment_coordinates(floor, compartment)
     # Draw the stickman using the x and y coordinates
-    pygame.draw.circle(screen, (0, 0, 0), (x + compartment_size/2, y + compartment_size/2), radius)
-    pygame.draw.line(screen, (0, 0, 0), (x + compartment_size/2, y + compartment_size/2), (x + compartment_size/2, y + compartment_size/2 + body_length), width)
-    pygame.draw.line(screen, (0, 0, 0), (x + compartment_size/2, y + compartment_size/2 + body_length/2), (x + compartment_size/2-arm_length, y + compartment_size/2 + body_length/2), width)
-    pygame.draw.line(screen, (0, 0, 0), (x + compartment_size/2, y + compartment_size/2 + body_length/2), (x + compartment_size/2+arm_length, y + compartment_size/2 + body_length/2), width)
-    pygame.draw.line(screen, (0, 0, 0), (x + compartment_size/2, y + compartment_size/2 + body_length), (x + compartment_size/2-leg_length, y + compartment_size/2 + body_length + leg_length), width)
-    pygame.draw.line(screen, (0, 0, 0), (x + compartment_size/2, y + compartment_size/2 + body_length), (x + compartment_size/2+leg_length, y + compartment_size/2 + body_length + leg_length), width)
+    pygame.draw.circle(screen, (0, 0, 0), (x + compartment_width/2, y + compartment_width/2), radius)
+    pygame.draw.line(screen, (0, 0, 0), (x + compartment_width/2, y + compartment_width/2), (x + compartment_width/2, y + compartment_width/2 + body_length), width)
+    pygame.draw.line(screen, (0, 0, 0), (x + compartment_width/2, y + compartment_width/2 + body_length/2), (x + compartment_width/2-arm_length, y + compartment_width/2 + body_length/2), width)
+    pygame.draw.line(screen, (0, 0, 0), (x + compartment_width/2, y + compartment_width/2 + body_length/2), (x + compartment_width/2+arm_length, y + compartment_width/2 + body_length/2), width)
+    pygame.draw.line(screen, (0, 0, 0), (x + compartment_width/2, y + compartment_width/2 + body_length), (x + compartment_width/2-leg_length, y + compartment_width/2 + body_length + leg_length), width)
+    pygame.draw.line(screen, (0, 0, 0), (x + compartment_width/2, y + compartment_width/2 + body_length), (x + compartment_width/2+leg_length, y + compartment_width/2 + body_length + leg_length), width)
     
     
 
