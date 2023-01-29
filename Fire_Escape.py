@@ -172,8 +172,10 @@ def reset_and_start_handling():
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if reset_button_rect.collidepoint(mouse_x, mouse_y):
                 reset()    
+                print("reset triggered")
             elif start_button_rect.collidepoint(mouse_x, mouse_y):
                 move_stickman(stickman_start_floor, stickman_start_compartment, main_door_floor, main_door_compartment)
+                print("start triggered")
 
 # Thread for Reset Handling 
 reset_thread = threading.Thread(target=reset_and_start_handling)
