@@ -156,7 +156,27 @@ mouse_thread.start()
 
 
 
-# Main game loop #
+# Function to handle reset button event
+def reset():
+    draw_building(number_of_floors)
+    draw_main_door(main_door_floor, main_door_compartment)
+    draw_stickman(stickman_start_floor, stickman_start_compartment)
+    clicked_compartments.clear()
+
+# Function to handle reset button event
+def reset_handling():
+    while True:
+
+        mouse_pressed = pygame.mouse.get_pressed()
+        if mouse_pressed[0] == 1:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if reset_button_rect.collidepoint(mouse_x, mouse_y):
+                reset()    
+
+# Thread for Reset Handling 
+reset_thread = threading.Thread(target=reset_handling)
+reset_thread.daemon = True
+reset_thread.start()
 
 # Main drawings should come outside the forever loop
 
@@ -168,13 +188,17 @@ draw_building(number_of_floors)
 draw_main_door(main_door_floor, main_door_compartment)    
 
 # Draw a reset button on the bottom left of the screen and when clicked, the building is drawn again and the stickman is redrawn to the start position
-pygame.draw.rect(screen, color_RED, (0, vert_screen_size - 50, 100, 50))
+reset_button_rect = pygame.draw.rect(screen, color_RED, (0, vert_screen_size - 50, 100, 50))
 font = pygame.font.Font('freesansbold.ttf', 32)
 text = font.render("Reset", True, color_WHITE, color_RED)
 textRect = text.get_rect()
 textRect.center = (50, vert_screen_size - 25)
 screen.blit(text, textRect)
 
+
+
+
+# Main game loop #
 
 running = True
 while running:
