@@ -9,6 +9,8 @@ from inputs import *
 pygame.init()
 
 screen = pygame.display.set_mode((horiz_screen_size, vert_screen_size))
+#Print a Title for the window
+pygame.display.set_caption("Fire Escape")
 
 floors = []
 colors = []
@@ -32,20 +34,6 @@ for i in range(number_of_floors):
         y_coord = vert_offset + i * floor_height
         floor_compartments.append((x_coord, y_coord))
     compartments.append(floor_compartments)
-
-#Stickman Constants
-radius = 10
-body_length = 20
-arm_length = 18
-leg_length = 18
-width = 6
-
-stickman_start_floor = 0      # 0 = top floor, 1 = floor below top floor, etc.
-stickman_start_compartment = 0        # Should be under "number_of_compartments_per_floor - 1" and >=0
-
-# Main Door Constants
-main_door_floor = 4
-main_door_compartment = 4
 
 # Make a list of all clicked compartments from the mouse click detection function
 clicked_compartments = [] 
@@ -176,9 +164,12 @@ def reset_and_start_handling():
             if reset_button_rect.collidepoint(mouse_x, mouse_y):
                 reset()    
                 print("reset triggered")
+                pygame.time.delay(100)
+                
             elif start_button_rect.collidepoint(mouse_x, mouse_y):
                 move_stickman(stickman_start_floor, stickman_start_compartment, main_door_floor, main_door_compartment)
                 print("start triggered")
+                pygame.time.delay(100)
 
 # Thread for Reset Handling 
 reset_thread = threading.Thread(target=reset_and_start_handling)
