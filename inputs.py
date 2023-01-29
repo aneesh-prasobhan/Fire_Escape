@@ -2,7 +2,7 @@
 
 #Screen Size
 horiz_screen_size = 850
-vert_screen_size = 550
+vert_screen_size = 650      # was 550 before
 
 
 #Colors
@@ -11,6 +11,8 @@ color_WHITE = (255, 255, 255)
 color_ASFALT = (128, 128, 128)
 color_BRONZE = (139, 69, 19)
 color_RED = (255, 0, 0)
+color_ORANGE = (255, 165, 0)
+color_YELLOW = (255, 255, 0)
 
 #Floors
 number_of_floors = 5
