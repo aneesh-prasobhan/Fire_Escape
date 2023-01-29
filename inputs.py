@@ -11,12 +11,13 @@ arm_length = 18
 leg_length = 18
 width = 6
 
-stickman_start_floor = 0      # 0 = top floor, 1 = floor below top floor, etc.
 stickman_start_compartment = 0        # Should be under "number_of_compartments_per_floor - 1" and >=0
+stickman_start_floor = 0      # 0 = top floor, 1 = floor below top floor, etc.
 
 # Main Door Constants
-main_door_floor = 4
 main_door_compartment = 4
+main_door_floor = 4
+
 
 #Floors
 number_of_floors = 5

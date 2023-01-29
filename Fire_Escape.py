@@ -27,11 +27,11 @@ compartment_width = building_width/number_of_compartments_per_floor
 
 # Compartments list
 compartments = []
-for i in range(number_of_floors):
+for i in range(number_of_compartments_per_floor):
     floor_compartments = []
-    for j in range(number_of_compartments_per_floor):
-        x_coord = horiz_offset + j * compartment_width
-        y_coord = vert_offset + i * floor_height
+    for j in range(number_of_floors):
+        x_coord = horiz_offset + i * compartment_width
+        y_coord = vert_offset + j * floor_height
         floor_compartments.append((x_coord, y_coord))
     compartments.append(floor_compartments)
 
@@ -48,18 +48,19 @@ def draw_building(number_of_floors):
         y_coord +=floors[i]
 
 # Function that draws the main door which takes in the floor and compartment as parameters
-def draw_main_door(floor, compartment):
-    x, y = get_compartment_coordinates(floor, compartment)
+def draw_main_door(compartment, floor):
+    x, y = get_compartment_coordinates(compartment, floor)
     pygame.draw.rect(screen, door_color, (x, y, compartment_width, floor_height))
+    print(compartment, floor)
 
-def get_compartment_coordinates(floor, compartment):
-    x, y = compartments[floor][compartment]
+def get_compartment_coordinates(compartment, floor):
+    x, y = compartments[compartment][floor]
     return (x, y)
 
 
 # Draw stickman function
-def draw_stickman(floor, compartment):
-    x, y = get_compartment_coordinates(floor, compartment)
+def draw_stickman(compartment, floor):
+    x, y = get_compartment_coordinates(compartment, floor)
 
     # Draw stickman using the x and y coordinates which starts in the middle of the compartment
     pygame.draw.circle(screen, (0, 0, 0), (x + compartment_width // 2, y + floor_height // 2), radius, width)
@@ -73,38 +74,39 @@ def draw_stickman(floor, compartment):
 def draw_compartment_rectangle():
     for i in range(number_of_floors):
         for j in range(number_of_compartments_per_floor):
-            x, y = compartments[i][j]
+            x, y = compartments[j][i]
             pygame.draw.rect(screen, compartment_rectangle_color, (x, y, compartment_width, floor_height), 1)
 
 # Draw a red rectangle with fill, takes in the floor and compartment as parameters. Every drawn compartment is then added to the clicked_compartments list
-def draw_compartment_rectangle_fill(floor, compartment):
-    x, y = get_compartment_coordinates(floor, compartment)
+def draw_compartment_rectangle_fill(compartment, floor):
+    x, y = get_compartment_coordinates(compartment, floor)
     pygame.draw.rect(screen, fire_color, (x, y, compartment_width, floor_height))
-    clicked_compartments.append((floor, compartment))
+    clicked_compartments.append((compartment, floor))
 
 
 # A function that takes in the stickman_start_floor and stickman_start_compartment and then redraws the stickman to the next adjacent compartment or floor which is closer to the main door, the stickman is redrawn again and again till it reaches the main door and then pauses
 
-def move_stickman(floor, compartment, main_door_floor, main_door_compartment):
+def move_stickman(compartment, floor, main_door_compartment, main_door_floor):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.display.quit()
                 pygame.quit()
                 return 
         if floor < main_door_floor and compartment < main_door_compartment:
             floor += 1
             compartment += 1
-            draw_stickman(floor, compartment)
+            draw_stickman(compartment, floor)
             pygame.display.update()
             pygame.time.delay(10)
         elif floor < main_door_floor and compartment == main_door_compartment:
             floor += 1
-            draw_stickman(floor, compartment)
+            draw_stickman(compartment, floor)
             pygame.display.update()
             pygame.time.delay(10)
         elif floor == main_door_floor and compartment < main_door_compartment:
             compartment += 1
-            draw_stickman(floor, compartment)
+            draw_stickman(compartment, floor)
             pygame.display.update()
             pygame.time.delay(10)
         elif floor == main_door_floor and compartment == main_door_compartment:
@@ -113,23 +115,26 @@ def move_stickman(floor, compartment, main_door_floor, main_door_compartment):
             # # Draw the building
             # draw_building(number_of_floors)
             # # Draw the door in defined floor and compartment
-            # draw_main_door(main_door_floor, main_door_compartment)  
+            # draw_main_door(main_door_compartment, main_door_floor)  
             break
 
-# Function that detects the mouse click and then draws a red rectangle on the compartment that is clicked
+# def flooding_algorithm()
 
+
+# Function that detects the mouse click and then draws a red rectangle on the compartment that is clicked
 def mouse_click_detection():
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.display.quit()
                 pygame.quit()
                 sys.exit()
 
         mouse_pressed = pygame.mouse.get_pressed()
         if mouse_pressed[0] == 1:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            for i in range(number_of_floors):
-                for j in range(number_of_compartments_per_floor):
+            for i in range(number_of_compartments_per_floor):
+                for j in range(number_of_floors):
                     x, y = compartments[i][j]
                     # Do not draw if the compartment is already clicked
                     if (i, j) in clicked_compartments:
@@ -150,8 +155,8 @@ mouse_thread.start()
 # Function to handle reset button event
 def reset():
     draw_building(number_of_floors)
-    draw_main_door(main_door_floor, main_door_compartment)
-    draw_stickman(stickman_start_floor, stickman_start_compartment)
+    draw_main_door(main_door_compartment, main_door_floor)
+    draw_stickman(stickman_start_compartment, stickman_start_floor)
     clicked_compartments.clear()
 
 # Function to handle reset button event
@@ -167,7 +172,7 @@ def reset_and_start_handling():
                 pygame.time.delay(100)
                 
             elif start_button_rect.collidepoint(mouse_x, mouse_y):
-                move_stickman(stickman_start_floor, stickman_start_compartment, main_door_floor, main_door_compartment)
+                move_stickman(stickman_start_compartment, stickman_start_floor, main_door_compartment, main_door_floor)
                 print("start triggered")
                 pygame.time.delay(100)
 
@@ -183,7 +188,7 @@ screen.fill(background_color)
 # Draw the building
 draw_building(number_of_floors)
 # Draw the door in defined floor and compartment
-draw_main_door(main_door_floor, main_door_compartment)    
+draw_main_door(main_door_compartment, main_door_floor)    
 
 # Draw a reset button on the bottom left of the screen and when clicked, the building is drawn again and the stickman is redrawn to the start position
 reset_button_rect = pygame.draw.rect(screen, color_RED, (0, vert_screen_size - 50, 100, 50))
@@ -211,7 +216,7 @@ while running:
             running = False
 
     #Draw Stickman
-    draw_stickman(stickman_start_floor, stickman_start_compartment)
+    draw_stickman(stickman_start_compartment, stickman_start_floor)
 
     # Draw compartment rectangles
     draw_compartment_rectangle()
@@ -227,7 +232,7 @@ while running:
 
 
     # # Move stickman, keep rerunning function when stickman reaches the main door
-    # move_stickman(stickman_start_floor, stickman_start_compartment, main_door_floor, main_door_compartment)
+    # move_stickman(stickman_start_compartment, stickman_start_floor, main_door_floor, main_door_compartment)
 
     # Update the screen
     pygame.display.update()
