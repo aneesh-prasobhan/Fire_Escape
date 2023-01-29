@@ -13,6 +13,7 @@ color_BRONZE = (139, 69, 19)
 color_RED = (255, 0, 0)
 color_ORANGE = (255, 165, 0)
 color_YELLOW = (255, 255, 0)
+color_GREEN = (0, 255, 0)
 
 #Floors
 number_of_floors = 5
