@@ -16,9 +16,9 @@ colors = []
 for i in range(number_of_floors):
     floors.append(floor_height)
     if i % 2 == 0:
-        colors.append(color_WHITE)
+        colors.append(floor_color_1)
     else:
-        colors.append(color_ASFALT)
+        colors.append(floor_color_2)
 
 #Compartment Size
 compartment_width = building_width/number_of_compartments_per_floor
@@ -54,12 +54,15 @@ def draw_building(number_of_floors):
     y_coord = vert_offset    #Starting point for drawing the floor at the top of the screen
     for i in range(number_of_floors):
         pygame.draw.rect(screen, colors[i], (25, y_coord, building_width, floors[i]))
+        # The first and last compartment of each floor is drawn with a different color_ASPHALT
+        pygame.draw.rect(screen, stairway_color, (25, y_coord, compartment_width, floors[i]))
+        pygame.draw.rect(screen, stairway_color, (25 + compartment_width * (number_of_compartments_per_floor - 1), y_coord, compartment_width, floors[i]))        
         y_coord +=floors[i]
 
 # Function that draws the main door which takes in the floor and compartment as parameters
 def draw_main_door(floor, compartment):
     x, y = get_compartment_coordinates(floor, compartment)
-    pygame.draw.rect(screen, color_BRONZE, (x, y, compartment_width, floor_height))
+    pygame.draw.rect(screen, door_color, (x, y, compartment_width, floor_height))
 
 def get_compartment_coordinates(floor, compartment):
     x, y = compartments[floor][compartment]
@@ -83,12 +86,12 @@ def draw_compartment_rectangle():
     for i in range(number_of_floors):
         for j in range(number_of_compartments_per_floor):
             x, y = compartments[i][j]
-            pygame.draw.rect(screen, color_RED, (x, y, compartment_width, floor_height), 1)
+            pygame.draw.rect(screen, compartment_rectangle_color, (x, y, compartment_width, floor_height), 1)
 
 # Draw a red rectangle with fill, takes in the floor and compartment as parameters. Every drawn compartment is then added to the clicked_compartments list
 def draw_compartment_rectangle_fill(floor, compartment):
     x, y = get_compartment_coordinates(floor, compartment)
-    pygame.draw.rect(screen, color_RED, (x, y, compartment_width, floor_height))
+    pygame.draw.rect(screen, fire_color, (x, y, compartment_width, floor_height))
     clicked_compartments.append((floor, compartment))
 
 
@@ -185,7 +188,7 @@ reset_thread.start()
 # Main drawings should come outside the forever loop
 
 # Background Color
-screen.fill(color_BROWN)
+screen.fill(background_color)
 # Draw the building
 draw_building(number_of_floors)
 # Draw the door in defined floor and compartment
@@ -194,15 +197,15 @@ draw_main_door(main_door_floor, main_door_compartment)
 # Draw a reset button on the bottom left of the screen and when clicked, the building is drawn again and the stickman is redrawn to the start position
 reset_button_rect = pygame.draw.rect(screen, color_RED, (0, vert_screen_size - 50, 100, 50))
 font = pygame.font.Font('freesansbold.ttf', 32)
-text = font.render("Reset", True, color_WHITE, color_RED)
+text = font.render("Reset", True, reset_button_text_color, reset_button_color)
 textRect = text.get_rect()
 textRect.center = (50, vert_screen_size - 25)
 screen.blit(text, textRect)
 
 # Draw a start button on the bottom right of the screen (above reset button) and when clicked, the stickman starts moving towards the main door
-start_button_rect = pygame.draw.rect(screen, color_GREEN, (0, vert_screen_size - 100, 100, 50))
+start_button_rect = pygame.draw.rect(screen, start_button_color, (0, vert_screen_size - 100, 100, 50))
 font = pygame.font.Font('freesansbold.ttf', 32)
-text = font.render("Start", True, color_WHITE, color_GREEN)
+text = font.render("Start", True, start_button_text_color, start_button_color)
 textRect = text.get_rect()
 textRect.center = (50, vert_screen_size - 75)
 screen.blit(text, textRect)
@@ -225,7 +228,7 @@ while running:
 
     #Prints the total number of clicked compartments in the bottom right of the screen
     font = pygame.font.Font('freesansbold.ttf', 32)
-    text = font.render(str(len(clicked_compartments)), True, color_WHITE, color_BROWN)
+    text = font.render(str(len(clicked_compartments)), True, clicked_compartment_counter_color, clicked_compartment_counter_box_color)
     textRect = text.get_rect()
     textRect.center = (vert_screen_size - 25, vert_screen_size - 25)
     screen.blit(text, textRect)   
