@@ -128,64 +128,112 @@ def move_stickman(compartment, floor, main_door_compartment, main_door_floor):
 # This array of coordinates is then used to draw the stickman by the 
 # move_stickman_with_algorithm function.
 
-def shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, clicked_compartments):
+# def shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, clicked_compartments):
+#     # Create a 2D grid representing the compartments
+#     grid = [[0 for x in range(number_of_compartments_per_floor)] for y in range(number_of_floors)]
+#     for x, y in clicked_compartments:
+#         grid[y][x] = 1
+#     # Define the start and end point
+#     start = (stickman_start_compartment, stickman_start_floor)
+#     end = (main_door_compartment, main_door_floor)
+#     print("start=", start)
+#     print("end=", end)
+#     # Create a priority queue
+#     heap = [(0, start)]
+#     visited = set()
+#     while heap:
+#         (cost, current) = heapq.heappop(heap)
+#         if current in visited:
+#             continue
+#         print("current=", current)
+#         visited.add(current)
+#         if current == end:
+#             print("visited path=", visited)
+#             break
+#         # Check all the adjacent compartments
+#         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+#             x, y = current
+#             if dy != 0 and (x != 0 and x != number_of_compartments_per_floor-1):
+#                 continue
+#             if x + dx < 0 or x + dx >= number_of_compartments_per_floor or y + dy < 0 or y + dy >= number_of_floors:
+#                 continue
+#             if grid[y + dy][x + dx] == 1:
+#                 continue
+#             heapq.heappush(heap, (cost + 1, (x + dx, y + dy)))
+
+#     path = []
+#     #Print Current array
+#     print("current in reco start=", current)
+#     while current != start:
+#         if current in path:
+#             print("No valid path found.")
+#             break
+#         path.append(current)
+#         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+#             x, y = current
+#             if dx == 0 and (x != 0 and x != number_of_compartments_per_floor - 1):
+#                 continue
+#             # Check if the next current value is in previous current values, if yes, then break
+#             if ((x + dx, y + dy) in visited) & ((x + dx, y + dy) not in path):
+
+#                 current = (x + dx, y + dy)
+#                 print("reconstructing current=", current)
+#                 break
+#         else:
+#             print("No valid next step found.")
+#             break
+
+#     # Reverse the path
+#     print(path)
+#     path.reverse()
+#     return path
+
+def bfs(clicked_compartments, start, end):
+    # Create a queue and a dictionary to keep track of the compartments
+    queue = [start]
+    parent = {start: None}
+
     # Create a 2D grid representing the compartments
     grid = [[0 for x in range(number_of_compartments_per_floor)] for y in range(number_of_floors)]
     for x, y in clicked_compartments:
         grid[y][x] = 1
-    # Define the start and end point
-    start = (stickman_start_compartment, stickman_start_floor)
-    end = (main_door_compartment, main_door_floor)
-    print("start=", start)
-    print("end=", end)
-    # Create a priority queue
-    heap = [(0, start)]
-    visited = set()
-    while heap:
-        (cost, current) = heapq.heappop(heap)
-        if current in visited:
-            continue
-        print("current=", current)
-        visited.add(current)
+
+    # Perform the BFS algorithm
+    while queue:
+        current = queue.pop(0)
         if current == end:
-            print("visited path=", visited)
-            break
-        # Check all the adjacent compartments
-        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            x, y = current
-            if dy != 0 and (x != 0 and x != number_of_compartments_per_floor-1):
-                continue
-            if x + dx < 0 or x + dx >= number_of_compartments_per_floor or y + dy < 0 or y + dy >= number_of_floors:
-                continue
-            if grid[y + dy][x + dx] == 1:
-                continue
-            heapq.heappush(heap, (cost + 1, (x + dx, y + dy)))
-
-    # Reconstruct the path
-    path = []
-    #Print Current array
-    print("current in reco start=", current)
-    while current != start:
-        if current in path:
-            print("No valid path found.")
-            break
-        path.append(current)
-        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            x, y = current
-            if dx == 0 and (x != 0 and x != number_of_compartments_per_floor - 1):
-                continue
-            # Check if the next current value is in previous current values, if yes, then break
-            if ((x + dx, y + dy) in visited) & ((x + dx, y + dy) not in path):
-
-                current = (x + dx, y + dy)
-                print("reconstructing current=", current)
-                break
+            return reconstruct_path(parent, end)
+        x, y = current
+        # Check if current node is the first or last compartment in the current floor
+        if x != 0 and x != number_of_compartments_per_floor-1:
+            for dx, dy in [(1, 0), (-1, 0)]:
+                if x + dx < 0 or x + dx >= number_of_compartments_per_floor or y + dy < 0 or y + dy >= number_of_floors:
+                    continue
+                if grid[y + dy][x + dx] == 1:
+                    continue
+                if (x + dx, y + dy) in parent:
+                    continue
+                parent[(x + dx, y + dy)] = current
+                queue.append((x + dx, y + dy))
         else:
-            print("No valid next step found.")
-            break
+            for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+                if x + dx < 0 or x + dx >= number_of_compartments_per_floor or y + dy < 0 or y + dy >= number_of_floors:
+                    continue
+                if grid[y + dy][x + dx] == 1:
+                    continue
+                if (x + dx, y + dy) in parent:
+                    continue
+                parent[(x + dx, y + dy)] = current
+                queue.append((x + dx, y + dy))
+    return None
 
-    # Reverse the path
-    print(path)
+
+
+def reconstruct_path(parent, current):
+    path = [current]
+    while current in parent and parent[current] is not None:
+        current = parent[current]
+        path.append(current)
     path.reverse()
     return path
 
@@ -257,8 +305,13 @@ def reset_and_start_handling():
             elif start_button_rect.collidepoint(mouse_x, mouse_y):
                 print("start triggered")
                 # move_stickman(stickman_start_compartment, stickman_start_floor, main_door_compartment, main_door_floor)
-                path = shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, clicked_compartments)
-                move_stickman_with_algorithm(path)
+                # path_for_stickman = shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, clicked_compartments)
+                
+                start = (stickman_start_compartment, stickman_start_floor)
+                end = (main_door_compartment, main_door_floor)
+                
+                path_for_stickman = bfs(clicked_compartments, start, end)
+                move_stickman_with_algorithm(path_for_stickman)
                 pygame.time.delay(100)
 
 # Thread for Reset Handling 
