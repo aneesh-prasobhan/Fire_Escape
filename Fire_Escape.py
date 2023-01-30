@@ -23,7 +23,8 @@ for i in range(number_of_floors):
     else:
         colors.append(floor_color_2)
 
-stickman_placing_MODE = True
+# Declare a Bool called place_stickman_MODE
+place_stickman_MODE = True
 
 #Compartment Size
 compartment_width = building_width/number_of_compartments_per_floor
@@ -294,7 +295,7 @@ def reconstruct_path(parent, current):
     return path
 
 
-def move_stickman_with_algorithm(path):
+def move_stickman_with_algorithm(path, no_PATH_FOUND_color):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -308,17 +309,22 @@ def move_stickman_with_algorithm(path):
                 draw_stickman(x, y)
                 pygame.display.update()
                 pygame.time.wait(100) # Wait for 100ms before moving to the next compartment
+            # Run Path Found Text
+            path_found_Text(path_found_text_color)
+            pygame.display.update()
             break
         else:
             font = pygame.font.Font(None, 36)
             print("no path found")
-            text = font.render("No Path Found", 1, (255, 255, 255))
-            screen.blit(text, (screen.get_width()//2 - text.get_width()//2, screen.get_height() - text.get_height()))
+            # Clear this region of the screen before writing the text
+            pygame.draw.rect(screen, background_color, (screen.get_width()//2 - 200, screen.get_height() - 75, 350, 100))
+            text = font.render("No Path Found", 1, no_PATH_FOUND_color)
+            screen.blit(text, (screen.get_width()//2 - text.get_width()//2, screen.get_height() - text.get_height() - 50))
             pygame.display.update()                
             break
 
 # Function that detects the mouse click and then draws a red rectangle on the compartment that is clicked
-def mouse_click_detection(stickman_placing_MODE = 1):
+def mouse_click_detection(stickman_placing_MODE = 1, is_stickman_placed = 0):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -330,7 +336,7 @@ def mouse_click_detection(stickman_placing_MODE = 1):
         if mouse_pressed[0] == 1:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             
-            if stickman_placing_MODE == False:
+            if stickman_placing_MODE == 0:
                 for i in range(number_of_compartments_per_floor):
                     for j in range(number_of_floors):
                         x, y = compartments[i][j]
@@ -344,7 +350,7 @@ def mouse_click_detection(stickman_placing_MODE = 1):
                             pygame.display.update()
                             print("red draw triggered")
 
-            else:
+            elif stickman_placing_MODE == 1:
                 # Place stickman in the compartment that is clicked
                 for i in range(number_of_compartments_per_floor):
                     for j in range(number_of_floors):
@@ -354,32 +360,44 @@ def mouse_click_detection(stickman_placing_MODE = 1):
                             draw_stickman(i, j)
                             pygame.display.update()
                             print("stickman draw triggered")  
-                            stickman_placing_MODE = False
+                            stickman_placing_MODE = 0
+                            is_stickman_placed = 1
                             # Change stickman start compartment and floor
                             stickman_start_compartment = i
                             stickman_start_floor = j
+                            # Run the set Fire Text Function
+                            set_fire_text(set_fire_text_color)
+                            pygame.time.delay(600)  # Debouncing
 
               
             
             
             if reset_button_rect.collidepoint(mouse_x, mouse_y):
                 reset()    
+                stickman_placing_MODE = 1
                 print("reset triggered")
                 pygame.time.delay(100)
+                place_stickman_text(place_stickman_text_color)
                 
             elif start_button_rect.collidepoint(mouse_x, mouse_y):
                 print("start triggered")
                 # move_stickman(stickman_start_compartment, stickman_start_floor, main_door_compartment, main_door_floor)
                 # path_for_stickman = shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, clicked_compartments)
                 
-                run_bfs_on_signs(screen, sign_list, clicked_compartments, main_door_compartment, main_door_floor)
+                # Give a default value to stickman_start_compartment and stickman_start_floor if stickman is not placed
+                if is_stickman_placed == 0:
+                    stickman_start_compartment = 0
+                    stickman_start_floor = 0
+                    draw_stickman(stickman_start_compartment, stickman_start_floor)
+                    pygame.display.update()
                 
+                run_bfs_on_signs(screen, sign_list, clicked_compartments, main_door_compartment, main_door_floor)
                 start = (stickman_start_compartment, stickman_start_floor)
                 end = (main_door_compartment, main_door_floor)
 
                 
                 path_for_stickman = bfs(clicked_compartments, start, end)
-                move_stickman_with_algorithm(path_for_stickman)
+                move_stickman_with_algorithm(path_for_stickman, no_PATH_FOUND_color)
                 pygame.time.delay(100)  # Debouncing
 
 # Thread to detect mouse click
@@ -398,10 +416,10 @@ def reset():
     draw_compartment_rectangle()
     draw_main_door(main_door_compartment, main_door_floor)
     draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment)
-    draw_stickman(stickman_start_compartment, stickman_start_floor)
-    draw_number_of_clicked_compartments()
-
+    # draw_stickman(stickman_start_compartment, stickman_start_floor)
+    pygame.display.update()
     clicked_compartments.clear()
+    draw_number_of_clicked_compartments()
 
 # # Drawing Number of Clicked Compartments
 def draw_number_of_clicked_compartments():
@@ -411,6 +429,33 @@ def draw_number_of_clicked_compartments():
     textRect = text.get_rect()
     textRect.center = (vert_screen_size - 25, vert_screen_size - 25)
     screen.blit(text, textRect)   
+
+# # Text saying "Place Stickman"
+
+def place_stickman_text(place_stickman_text_color):
+    font = pygame.font.Font(None, 36)
+    print("Place the Stickman")
+    pygame.draw.rect(screen, background_color, (screen.get_width()//2 - 200, screen.get_height() - 75, 350, 100))
+    text = font.render("Place Stickman", 1, place_stickman_text_color)
+    screen.blit(text, (screen.get_width()//2 - text.get_width()//2, screen.get_height() - text.get_height() - 50))
+    pygame.display.update()   
+
+def set_fire_text(set_fire_text_color):
+    font = pygame.font.Font(None, 36)
+    print("Set Fire to the Compartments")
+    pygame.draw.rect(screen, background_color, (screen.get_width()//2 - 200, screen.get_height() - 75, 350, 100))
+    text = font.render("Set Fire to Compartments", 1, set_fire_text_color)
+    screen.blit(text, (screen.get_width()//2 - text.get_width()//2, screen.get_height() - text.get_height() - 50))
+    pygame.display.update()   
+
+def path_found_Text(path_found_text_color):
+    font = pygame.font.Font(None, 36)
+    print("Shortest Path is Found")
+    pygame.draw.rect(screen, background_color, (screen.get_width()//2 - 200, screen.get_height() - 75, 350, 100))
+    text = font.render("Shortest Path Found", 1, path_found_text_color)
+    screen.blit(text, (screen.get_width()//2 - text.get_width()//2, screen.get_height() - text.get_height() - 50))
+    pygame.display.update()   
+
 
 
 # Main drawings should come outside the forever loop
@@ -463,8 +508,7 @@ def draw_buttons(screen, font, reset_button_color, reset_button_text_color, star
 # Draw compartment rectangles for initializing
 draw_compartment_rectangle()
 
-#Draw Stickman
-# draw_stickman(stickman_start_compartment, stickman_start_floor)
+place_stickman_text(place_stickman_text_color)
 
 # Draw Clicked Compartments 
 draw_number_of_clicked_compartments()
