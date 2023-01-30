@@ -103,7 +103,9 @@ def draw_sign(screen, x, y, width, height, direction):
         pygame.draw.polygon(screen, (255, 0, 0), [(x + 1, center_y), (center_x, center_y + height // 4), (center_x, center_y - height // 4)])
     elif direction == "right":
         pygame.draw.polygon(screen, (255, 0, 0), [(x + width - 1, center_y), (center_x, center_y + height // 4), (center_x, center_y - height // 4)])
-
+    print("drawing sign")
+    # pygame.display.update()
+    
 def draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment):
     sign_list = []
     for i in range(len(compartments)):
@@ -118,10 +120,12 @@ def draw_default_signs_on_floors(screen, compartments, number_of_compartments_pe
             # Draw signs towards main door
                 # Draw signs on even compartments of even-numbered floors
                 if (i % 2 == 0 and j % 2 == 0):
+                    print("default (x,y)=", x,y)
                     draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "left" if main_door_compartment < i else "right")
                     sign_list.append((int(compartment_number), j))
                 # Draw signs on odd compartments of odd-numbered floors
                 elif (i % 2 != 0 and j % 2 != 0):
+                    print("default (x,y)=", x,y)
                     draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "left" if main_door_compartment < i else "right")                
                     sign_list.append((int(compartment_number), j))
             else:
@@ -129,9 +133,11 @@ def draw_default_signs_on_floors(screen, compartments, number_of_compartments_pe
                 if i % 2 != 0 and j % 2 != 0:
                 # Draw signs in direction of closest first or last compartment
                     if compartment_number < number_of_compartments_per_floor // 2:
+                        print("default (x,y)=", x,y)
                         draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "left")
                         sign_list.append((int(compartment_number), j))
                     else:
+                        print("default (x,y)=", x,y)
                         draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "right")
                         sign_list.append((int(compartment_number), j))
                         
@@ -139,13 +145,57 @@ def draw_default_signs_on_floors(screen, compartments, number_of_compartments_pe
                 elif (i % 2 == 0 and j % 2 == 0):
                     # Draw signs in direction of closest first or last compartment
                     if compartment_number < number_of_compartments_per_floor // 2:
+                        print("default (x,y)=", x,y)
                         draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "left")
                         sign_list.append((int(compartment_number), j))
                     else:
+                        print("default (x,y)=", x,y)
                         draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "right")
                         sign_list.append((int(compartment_number), j))
     return sign_list
-                        
+             
+
+# Now I have a list of compartments  where the signs are present. What I want to do now is I want to have a new  function which runs the bfs algorithm on each compartment inside the sign_list and find the shortest part to the main door. After finding the path, I want to re display the signs so that it shows the arrow in the direction of the next compartment in the shortest path result from the bfs algorithm. In the new function, use the bfs function which takes in clicked_compartments, start and end (start here is the current compartment in the sign_list, end is the compartment of the main door). 
+def run_bfs_on_signs(screen, sign_list, clicked_compartments, main_door_compartment, main_door_floor):
+    for start in sign_list:
+        end = (main_door_compartment, main_door_floor)
+        sign_path = bfs(clicked_compartments, start, end)
+        # Clip path so that it only has the first two positions
+        sign_path = sign_path[1:2]
+        # Current Sign 
+        print("current sign =", start)
+        print("next path =", sign_path)
+        if sign_path:
+            current_sign = start
+            next_path = sign_path[0]
+            print("calling redraw function")
+            redraw_signs(screen, current_sign, next_path)
+            # break
+
+
+def redraw_signs(screen, current_sign, next_path):
+
+    x_position, y_position = current_sign 
+    x,y = get_compartment_coordinates(x_position, y_position)
+    
+    next_x_position, next_y_position = next_path
+    next_x, next_y = get_compartment_coordinates(next_x_position, next_y_position)
+    
+    print("got coordinates")
+    # If next x is greater and next y is same as current y, then draw sign to the right
+    if next_x > x and next_y == y:
+        print("(x,y)=", x,y)
+        draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "right")
+    elif next_x < x and next_y == y:
+        print("(x,y)=", x,y)
+        draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "left")
+    elif next_y > y and next_x == x:
+        print("(x,y)=", x,y)
+        draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "down")
+    elif next_y < y and next_x == x:
+        print("(x,y)=", x,y)
+        draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "up")
+
 
 # A function that takes in the stickman_start_floor and stickman_start_compartment and then redraws the stickman to the next adjacent compartment or floor which is closer to the main door, the stickman is redrawn again and again till it reaches the main door and then pauses
 
@@ -289,6 +339,7 @@ mouse_thread.start()
 def reset():
     draw_building(number_of_floors)
     draw_main_door(main_door_compartment, main_door_floor)
+    draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment)
     draw_stickman(stickman_start_compartment, stickman_start_floor)
     clicked_compartments.clear()
 
@@ -309,8 +360,11 @@ def reset_and_start_handling():
                 # move_stickman(stickman_start_compartment, stickman_start_floor, main_door_compartment, main_door_floor)
                 # path_for_stickman = shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, clicked_compartments)
                 
+                run_bfs_on_signs(screen, sign_list, clicked_compartments, main_door_compartment, main_door_floor)
+                
                 start = (stickman_start_compartment, stickman_start_floor)
                 end = (main_door_compartment, main_door_floor)
+
                 
                 path_for_stickman = bfs(clicked_compartments, start, end)
                 move_stickman_with_algorithm(path_for_stickman)
