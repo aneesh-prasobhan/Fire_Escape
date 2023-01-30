@@ -160,6 +160,8 @@ def run_bfs_on_signs(screen, sign_list, clicked_compartments, main_door_compartm
     for start in sign_list:
         end = (main_door_compartment, main_door_floor)
         sign_path = bfs(clicked_compartments, start, end)
+        if sign_path is None:
+            continue
         # Clip path so that it only has the first two positions
         sign_path = sign_path[1:2]
         # Current Sign 
@@ -297,12 +299,21 @@ def move_stickman_with_algorithm(path):
                 pygame.display.quit()
                 pygame.quit()
                 return 
-        for i in range(len(path)):
-            x, y = path[i]
-            draw_stickman(x, y)
-            pygame.display.update()
-            pygame.time.wait(100) # Wait for 100ms before moving to the next compartment
-        break
+            
+        if path is not None:
+            for i in range(len(path)):
+                x, y = path[i]
+                draw_stickman(x, y)
+                pygame.display.update()
+                pygame.time.wait(100) # Wait for 100ms before moving to the next compartment
+            break
+        else:
+            font = pygame.font.Font(None, 36)
+            print("no path found")
+            text = font.render("No Path Found", 1, (255, 255, 255))
+            screen.blit(text, (screen.get_width()//2 - text.get_width()//2, screen.get_height() - text.get_height()))
+            pygame.display.update()                
+            break
 
 # Function that detects the mouse click and then draws a red rectangle on the compartment that is clicked
 def mouse_click_detection():
@@ -337,6 +348,7 @@ mouse_thread.start()
 
 # Function to handle reset button event
 def reset():
+    screen.fill(background_color)
     draw_building(number_of_floors)
     draw_main_door(main_door_compartment, main_door_floor)
     draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment)
@@ -391,6 +403,7 @@ sign_list = draw_default_signs_on_floors(screen, compartments, number_of_compart
 print(sign_list)
 
 # Draw a reset button on the bottom left of the screen and when clicked, the building is drawn again and the stickman is redrawn to the start position
+
 reset_button_rect = pygame.draw.rect(screen, color_RED, (0, vert_screen_size - 50, 100, 50))
 font = pygame.font.Font('freesansbold.ttf', 32)
 text = font.render("Reset", True, reset_button_text_color, reset_button_color)
@@ -399,6 +412,7 @@ textRect.center = (50, vert_screen_size - 25)
 screen.blit(text, textRect)
 
 # Draw a start button on the bottom right of the screen (above reset button) and when clicked, the stickman starts moving towards the main door
+
 start_button_rect = pygame.draw.rect(screen, start_button_color, (0, vert_screen_size - 100, 100, 50))
 font = pygame.font.Font('freesansbold.ttf', 32)
 text = font.render("Start", True, start_button_text_color, start_button_color)
