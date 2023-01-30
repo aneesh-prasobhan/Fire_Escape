@@ -349,6 +349,7 @@ mouse_thread.start()
 # Function to handle reset button event
 def reset():
     screen.fill(background_color)
+    draw_buttons(screen, font, reset_button_color, reset_button_text_color, start_button_color, start_button_text_color, vert_screen_size)
     draw_building(number_of_floors)
     draw_main_door(main_door_compartment, main_door_floor)
     draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment)
@@ -402,8 +403,9 @@ draw_main_door(main_door_compartment, main_door_floor)
 sign_list = draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment)
 print(sign_list)
 
-# Draw a reset button on the bottom left of the screen and when clicked, the building is drawn again and the stickman is redrawn to the start position
 
+# Drawing in Global
+# Draw a reset button on the bottom left of the screen and when clicked, the building is drawn again and the stickman is redrawn to the start position
 reset_button_rect = pygame.draw.rect(screen, color_RED, (0, vert_screen_size - 50, 100, 50))
 font = pygame.font.Font('freesansbold.ttf', 32)
 text = font.render("Reset", True, reset_button_text_color, reset_button_color)
@@ -412,13 +414,25 @@ textRect.center = (50, vert_screen_size - 25)
 screen.blit(text, textRect)
 
 # Draw a start button on the bottom right of the screen (above reset button) and when clicked, the stickman starts moving towards the main door
-
 start_button_rect = pygame.draw.rect(screen, start_button_color, (0, vert_screen_size - 100, 100, 50))
 font = pygame.font.Font('freesansbold.ttf', 32)
 text = font.render("Start", True, start_button_text_color, start_button_color)
 textRect = text.get_rect()
 textRect.center = (50, vert_screen_size - 75)
 screen.blit(text, textRect)
+
+def draw_buttons(screen, font, reset_button_color, reset_button_text_color, start_button_color, start_button_text_color, vert_screen_size):
+    reset_button_rect = pygame.draw.rect(screen, color_RED, (0, vert_screen_size - 50, 100, 50))
+    text = font.render("Reset", True, reset_button_text_color, reset_button_color)
+    textRect = text.get_rect()
+    textRect.center = (50, vert_screen_size - 25)
+    screen.blit(text, textRect)
+  
+    start_button_rect = pygame.draw.rect(screen, start_button_color, (0, vert_screen_size - 100, 100, 50))
+    text = font.render("Start", True, start_button_text_color, start_button_color)
+    textRect = text.get_rect()
+    textRect.center = (50, vert_screen_size - 75)
+    screen.blit(text, textRect)
 
 
 # Main game loop #
