@@ -104,7 +104,7 @@ def draw_sign(screen, x, y, width, height, direction):
     elif direction == "right":
         pygame.draw.polygon(screen, (255, 0, 0), [(x + width - 1, center_y), (center_x, center_y + height // 4), (center_x, center_y - height // 4)])
 
-def draw_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment):
+def draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment):
     for i in range(len(compartments)):
         floor_compartments = compartments[i]
         for j in range(len(floor_compartments)):
@@ -115,12 +115,13 @@ def draw_signs_on_floors(screen, compartments, number_of_compartments_per_floor,
                 continue
             if j == main_door_floor:
             # Draw signs towards main door
+                # Draw signs on even compartments of even-numbered floors
                 if (i % 2 == 0 and j % 2 == 0):
                     draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "left" if main_door_compartment < i else "right")
-                    break
+                # Draw signs on odd compartments of odd-numbered floors
                 elif (i % 2 != 0 and j % 2 != 0):
                     draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "left" if main_door_compartment < i else "right")                
-
+                
             else:
             # Draw signs on odd compartments of odd-numbered floors
                 if i % 2 != 0 and j % 2 != 0:
@@ -325,7 +326,7 @@ draw_main_door(main_door_compartment, main_door_floor)
 # Draw a sign board with black border and white fill half the size of the compartment which has a Red arrow (with red fill) pointing to the nearest compartment which is either the first compartment or the last compartment in the floor.
 # A sign board should be drawn in every odd number of compartments in the first floor and every even number of compartments in the seconds floor and so on.
 
-draw_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment)
+draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment)
 
 # Draw a reset button on the bottom left of the screen and when clicked, the building is drawn again and the stickman is redrawn to the start position
 reset_button_rect = pygame.draw.rect(screen, color_RED, (0, vert_screen_size - 50, 100, 50))
