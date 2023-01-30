@@ -136,7 +136,8 @@ def shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, 
     # Define the start and end point
     start = (stickman_start_compartment, stickman_start_floor)
     end = (main_door_compartment, main_door_floor)
-
+    print("start=", start)
+    print("end=", end)
     # Create a priority queue
     heap = [(0, start)]
     visited = set()
@@ -144,6 +145,7 @@ def shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, 
         (cost, current) = heapq.heappop(heap)
         if current in visited:
             continue
+        print("current=", current)
         visited.add(current)
         if current == end:
             print("visited path=", visited)
@@ -161,6 +163,8 @@ def shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, 
 
     # Reconstruct the path
     path = []
+    #Print Current array
+    print("current in reco start=", current)
     while current != start:
         if current in path:
             print("No valid path found.")
@@ -170,14 +174,15 @@ def shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, 
             x, y = current
             if dx == 0 and (x != 0 and x != number_of_compartments_per_floor - 1):
                 continue
-            if (x + dx, y + dy) in visited:
+            # Check if the next current value is in previous current values, if yes, then break
+            if ((x + dx, y + dy) in visited) & ((x + dx, y + dy) not in path):
+
                 current = (x + dx, y + dy)
+                print("reconstructing current=", current)
                 break
         else:
             print("No valid next step found.")
             break
-
-
 
     # Reverse the path
     print(path)
