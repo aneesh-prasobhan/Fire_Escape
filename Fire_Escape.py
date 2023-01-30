@@ -84,6 +84,54 @@ def draw_compartment_rectangle_fill(compartment, floor):
     pygame.draw.rect(screen, fire_color, (x, y, compartment_width, floor_height))
     clicked_compartments.append((compartment, floor))
 
+def draw_sign(screen, x, y, width, height, direction):
+    # Draw the black border of the sign board
+    pygame.draw.rect(screen, (0, 0, 0), (x, y, width, height), 1)
+    # Draw the white fill inside the sign board
+    pygame.draw.rect(screen, (255, 255, 255), (x + 1, y + 1, width - 2, height - 2))
+
+    # Calculate the coordinates of the center of the sign board
+    center_x = x + width // 2
+    center_y = y + height // 2
+
+    # Draw the red arrow based on the direction argument
+    if direction == "up":
+        pygame.draw.polygon(screen, (255, 0, 0), [(center_x, y + 1), (center_x + width // 4, center_y), (center_x - width // 4, center_y)])
+    elif direction == "down":
+        pygame.draw.polygon(screen, (255, 0, 0), [(center_x, y + height - 1), (center_x + width // 4, center_y), (center_x - width // 4, center_y)])
+    elif direction == "left":
+        pygame.draw.polygon(screen, (255, 0, 0), [(x + 1, center_y), (center_x, center_y + height // 4), (center_x, center_y - height // 4)])
+    elif direction == "right":
+        pygame.draw.polygon(screen, (255, 0, 0), [(x + width - 1, center_y), (center_x, center_y + height // 4), (center_x, center_y - height // 4)])
+
+def draw_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width):
+    for i in range(len(compartments)):
+        floor_compartments = compartments[i]
+        for j in range(len(floor_compartments)):
+            x, y = floor_compartments[j]
+            compartment_number = x // compartment_width
+            # Skip the main door compartment
+            if i == main_door_floor and j == main_door_compartment:
+                continue
+            
+            # Draw signs on odd compartments of odd-numbered floors
+            if i % 2 != 0 and j % 2 != 0:
+             
+                # Draw signs in direction of closest first or last compartment
+                if compartment_number < number_of_compartments_per_floor // 2:
+                    draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "left")
+                else:
+                    draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "right")
+
+            # Draw signs on even compartments of even-numbered floors
+            elif i % 2 == 0 and j % 2 == 0:
+                
+                # Draw signs in direction of closest first or last compartment
+                if compartment_number < number_of_compartments_per_floor // 2:
+                    draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "left")
+                else:
+                    draw_sign(screen, x + compartment_width // 4, y + floor_height // 4, compartment_width // 2, floor_height // 2, "right")
+                
 
 # A function that takes in the stickman_start_floor and stickman_start_compartment and then redraws the stickman to the next adjacent compartment or floor which is closer to the main door, the stickman is redrawn again and again till it reaches the main door and then pauses
 
@@ -127,66 +175,6 @@ def move_stickman(compartment, floor, main_door_compartment, main_door_floor):
 # and last compartment of each floor. On the same floor, the stickamn can tracel through any adjacent compartment.
 # This array of coordinates is then used to draw the stickman by the 
 # move_stickman_with_algorithm function.
-
-# def shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, clicked_compartments):
-#     # Create a 2D grid representing the compartments
-#     grid = [[0 for x in range(number_of_compartments_per_floor)] for y in range(number_of_floors)]
-#     for x, y in clicked_compartments:
-#         grid[y][x] = 1
-#     # Define the start and end point
-#     start = (stickman_start_compartment, stickman_start_floor)
-#     end = (main_door_compartment, main_door_floor)
-#     print("start=", start)
-#     print("end=", end)
-#     # Create a priority queue
-#     heap = [(0, start)]
-#     visited = set()
-#     while heap:
-#         (cost, current) = heapq.heappop(heap)
-#         if current in visited:
-#             continue
-#         print("current=", current)
-#         visited.add(current)
-#         if current == end:
-#             print("visited path=", visited)
-#             break
-#         # Check all the adjacent compartments
-#         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-#             x, y = current
-#             if dy != 0 and (x != 0 and x != number_of_compartments_per_floor-1):
-#                 continue
-#             if x + dx < 0 or x + dx >= number_of_compartments_per_floor or y + dy < 0 or y + dy >= number_of_floors:
-#                 continue
-#             if grid[y + dy][x + dx] == 1:
-#                 continue
-#             heapq.heappush(heap, (cost + 1, (x + dx, y + dy)))
-
-#     path = []
-#     #Print Current array
-#     print("current in reco start=", current)
-#     while current != start:
-#         if current in path:
-#             print("No valid path found.")
-#             break
-#         path.append(current)
-#         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-#             x, y = current
-#             if dx == 0 and (x != 0 and x != number_of_compartments_per_floor - 1):
-#                 continue
-#             # Check if the next current value is in previous current values, if yes, then break
-#             if ((x + dx, y + dy) in visited) & ((x + dx, y + dy) not in path):
-
-#                 current = (x + dx, y + dy)
-#                 print("reconstructing current=", current)
-#                 break
-#         else:
-#             print("No valid next step found.")
-#             break
-
-#     # Reverse the path
-#     print(path)
-#     path.reverse()
-#     return path
 
 def bfs(clicked_compartments, start, end):
     # Create a queue and a dictionary to keep track of the compartments
@@ -326,7 +314,12 @@ screen.fill(background_color)
 # Draw the building
 draw_building(number_of_floors)
 # Draw the door in defined floor and compartment
-draw_main_door(main_door_compartment, main_door_floor)    
+draw_main_door(main_door_compartment, main_door_floor)   
+
+# Draw a sign board with black border and white fill half the size of the compartment which has a Red arrow (with red fill) pointing to the nearest compartment which is either the first compartment or the last compartment in the floor.
+# A sign board should be drawn in every odd number of compartments in the first floor and every even number of compartments in the seconds floor and so on.
+
+draw_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width)
 
 # Draw a reset button on the bottom left of the screen and when clicked, the building is drawn again and the stickman is redrawn to the start position
 reset_button_rect = pygame.draw.rect(screen, color_RED, (0, vert_screen_size - 50, 100, 50))
