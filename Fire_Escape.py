@@ -23,6 +23,8 @@ for i in range(number_of_floors):
     else:
         colors.append(floor_color_2)
 
+stickman_placing_MODE = True
+
 #Compartment Size
 compartment_width = building_width/number_of_compartments_per_floor
 
@@ -316,7 +318,7 @@ def move_stickman_with_algorithm(path):
             break
 
 # Function that detects the mouse click and then draws a red rectangle on the compartment that is clicked
-def mouse_click_detection():
+def mouse_click_detection(stickman_placing_MODE = 1):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -327,42 +329,39 @@ def mouse_click_detection():
         mouse_pressed = pygame.mouse.get_pressed()
         if mouse_pressed[0] == 1:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            for i in range(number_of_compartments_per_floor):
-                for j in range(number_of_floors):
-                    x, y = compartments[i][j]
-                    # Do not draw if the compartment is already clicked
-                    if (i, j) in clicked_compartments:
-                        continue
-                    if x < mouse_x < x + compartment_width and y < mouse_y < y + floor_height:
-                        mouse_pressed[0] == 1
-                        draw_compartment_rectangle_fill(i, j)
-                        pygame.display.update()
-                        print("red draw triggered")
+            
+            if stickman_placing_MODE == False:
+                for i in range(number_of_compartments_per_floor):
+                    for j in range(number_of_floors):
+                        x, y = compartments[i][j]
+                        # Do not draw if the compartment is already clicked
+                        if (i, j) in clicked_compartments:
+                            continue
+                        if x < mouse_x < x + compartment_width and y < mouse_y < y + floor_height:
+                            mouse_pressed[0] == 1
+                            draw_compartment_rectangle_fill(i, j)
+                            draw_number_of_clicked_compartments()
+                            pygame.display.update()
+                            print("red draw triggered")
 
-# Thread to detect mouse click
-mouse_thread = threading.Thread(target=mouse_click_detection)
-mouse_thread.daemon = True
-mouse_thread.start()
+            else:
+                # Place stickman in the compartment that is clicked
+                for i in range(number_of_compartments_per_floor):
+                    for j in range(number_of_floors):
+                        x, y = compartments[i][j]
+                        if x < mouse_x < x + compartment_width and y < mouse_y < y + floor_height:
+                            mouse_pressed[0] == 1
+                            draw_stickman(i, j)
+                            pygame.display.update()
+                            print("stickman draw triggered")  
+                            stickman_placing_MODE = False
+                            # Change stickman start compartment and floor
+                            stickman_start_compartment = i
+                            stickman_start_floor = j
 
-
-
-# Function to handle reset button event
-def reset():
-    screen.fill(background_color)
-    draw_buttons(screen, font, reset_button_color, reset_button_text_color, start_button_color, start_button_text_color, vert_screen_size)
-    draw_building(number_of_floors)
-    draw_main_door(main_door_compartment, main_door_floor)
-    draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment)
-    draw_stickman(stickman_start_compartment, stickman_start_floor)
-    clicked_compartments.clear()
-
-# Function to handle reset button event
-def reset_and_start_handling():
-    while True:
-
-        mouse_pressed = pygame.mouse.get_pressed()
-        if mouse_pressed[0] == 1:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
+              
+            
+            
             if reset_button_rect.collidepoint(mouse_x, mouse_y):
                 reset()    
                 print("reset triggered")
@@ -381,12 +380,38 @@ def reset_and_start_handling():
                 
                 path_for_stickman = bfs(clicked_compartments, start, end)
                 move_stickman_with_algorithm(path_for_stickman)
-                pygame.time.delay(100)
+                pygame.time.delay(100)  # Debouncing
 
-# Thread for Reset Handling 
-reset_thread = threading.Thread(target=reset_and_start_handling)
-reset_thread.daemon = True
-reset_thread.start()
+# Thread to detect mouse click
+mouse_thread = threading.Thread(target=mouse_click_detection)
+mouse_thread.daemon = True
+mouse_thread.start()
+
+
+
+# Function to handle reset button event
+def reset():
+    screen.fill(background_color)
+    draw_buttons(screen, font, reset_button_color, reset_button_text_color, start_button_color, start_button_text_color, vert_screen_size)
+    draw_building(number_of_floors)
+    # Draw compartment rectangles
+    draw_compartment_rectangle()
+    draw_main_door(main_door_compartment, main_door_floor)
+    draw_default_signs_on_floors(screen, compartments, number_of_compartments_per_floor, floor_height, compartment_width, main_door_floor, main_door_compartment)
+    draw_stickman(stickman_start_compartment, stickman_start_floor)
+    draw_number_of_clicked_compartments()
+
+    clicked_compartments.clear()
+
+# # Drawing Number of Clicked Compartments
+def draw_number_of_clicked_compartments():
+    #Prints the total number of clicked compartments in the bottom right of the screen
+    font = pygame.font.Font('freesansbold.ttf', 32)
+    text = font.render(str(len(clicked_compartments)), True, clicked_compartment_counter_color, clicked_compartment_counter_box_color)
+    textRect = text.get_rect()
+    textRect.center = (vert_screen_size - 25, vert_screen_size - 25)
+    screen.blit(text, textRect)   
+
 
 # Main drawings should come outside the forever loop
 
@@ -435,6 +460,16 @@ def draw_buttons(screen, font, reset_button_color, reset_button_text_color, star
     screen.blit(text, textRect)
 
 
+# Draw compartment rectangles for initializing
+draw_compartment_rectangle()
+
+#Draw Stickman
+# draw_stickman(stickman_start_compartment, stickman_start_floor)
+
+# Draw Clicked Compartments 
+draw_number_of_clicked_compartments()
+
+
 # Main game loop #
 
 running = True
@@ -443,28 +478,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    #Draw Stickman
-    draw_stickman(stickman_start_compartment, stickman_start_floor)
 
-    # Draw compartment rectangles
-    draw_compartment_rectangle()
-    
-
-    #Prints the total number of clicked compartments in the bottom right of the screen
-    font = pygame.font.Font('freesansbold.ttf', 32)
-    text = font.render(str(len(clicked_compartments)), True, clicked_compartment_counter_color, clicked_compartment_counter_box_color)
-    textRect = text.get_rect()
-    textRect.center = (vert_screen_size - 25, vert_screen_size - 25)
-    screen.blit(text, textRect)   
-
-
-
-    # # Move stickman, keep rerunning function when stickman reaches the main door
-    # move_stickman(stickman_start_compartment, stickman_start_floor, main_door_floor, main_door_compartment)
 
     # Update the screen
-    pygame.display.update()
-
+    pygame.display.update()         # Needed for fast screen updates
+    pygame.time.delay(10)       
 # Quit pygame
 pygame.display.quit()
 pygame.quit()
