@@ -2,6 +2,7 @@ import pygame
 import pygame.locals as pl
 import threading
 import sys
+import heapq
 
 from inputs import *
 
@@ -118,8 +119,85 @@ def move_stickman(compartment, floor, main_door_compartment, main_door_floor):
             # draw_main_door(main_door_compartment, main_door_floor)  
             break
 
-# def flooding_algorithm()
+# A function that takes in number of compartments per floor 
+# as the max x axis, number of floors as the max y axis and 
+# takes in the compartments that are already clicked as the obstacles
+# then returns the shortest path to the main door. The path is returned as an array of coordinates
+# traveling through adjacent compartments and floors. The stickman can only travel through the first 
+# and last compartment of each floor. On the same floor, the stickamn can tracel through any adjacent compartment.
+# This array of coordinates is then used to draw the stickman by the 
+# move_stickman_with_algorithm function.
 
+def shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, clicked_compartments):
+    # Create a 2D grid representing the compartments
+    grid = [[0 for x in range(number_of_compartments_per_floor)] for y in range(number_of_floors)]
+    for x, y in clicked_compartments:
+        grid[y][x] = 1
+    # Define the start and end point
+    start = (stickman_start_compartment, stickman_start_floor)
+    end = (main_door_compartment, main_door_floor)
+
+    # Create a priority queue
+    heap = [(0, start)]
+    visited = set()
+    while heap:
+        (cost, current) = heapq.heappop(heap)
+        if current in visited:
+            continue
+        visited.add(current)
+        if current == end:
+            print("visited path=", visited)
+            break
+        # Check all the adjacent compartments
+        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            x, y = current
+            if dy != 0 and (x != 0 and x != number_of_compartments_per_floor-1):
+                continue
+            if x + dx < 0 or x + dx >= number_of_compartments_per_floor or y + dy < 0 or y + dy >= number_of_floors:
+                continue
+            if grid[y + dy][x + dx] == 1:
+                continue
+            heapq.heappush(heap, (cost + 1, (x + dx, y + dy)))
+
+    # Reconstruct the path
+    path = []
+    while current != start:
+        if current in path:
+            print("No valid path found.")
+            break
+        path.append(current)
+        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            x, y = current
+            if dx == 0 and (x != 0 and x != number_of_compartments_per_floor - 1):
+                continue
+            if (x + dx, y + dy) in visited:
+                current = (x + dx, y + dy)
+                break
+        else:
+            print("No valid next step found.")
+            break
+
+
+
+    # Reverse the path
+    print(path)
+    path.reverse()
+    return path
+
+
+def move_stickman_with_algorithm(path):
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.display.quit()
+                pygame.quit()
+                return 
+        for i in range(len(path)):
+            x, y = path[i]
+            draw_stickman(x, y)
+            pygame.display.update()
+            pygame.time.wait(100) # Wait for 100ms before moving to the next compartment
+        break
 
 # Function that detects the mouse click and then draws a red rectangle on the compartment that is clicked
 def mouse_click_detection():
@@ -172,8 +250,10 @@ def reset_and_start_handling():
                 pygame.time.delay(100)
                 
             elif start_button_rect.collidepoint(mouse_x, mouse_y):
-                move_stickman(stickman_start_compartment, stickman_start_floor, main_door_compartment, main_door_floor)
                 print("start triggered")
+                # move_stickman(stickman_start_compartment, stickman_start_floor, main_door_compartment, main_door_floor)
+                path = shortest_path_algorithm(number_of_compartments_per_floor, number_of_floors, clicked_compartments)
+                move_stickman_with_algorithm(path)
                 pygame.time.delay(100)
 
 # Thread for Reset Handling 
